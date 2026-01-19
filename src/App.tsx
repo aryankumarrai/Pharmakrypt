@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, collection, addDoc, query, where, 
-  onSnapshot, updateDoc, doc, serverTimestamp, orderBy, limit, getDocs, writeBatch, deleteDoc 
+  onSnapshot, updateDoc, doc, serverTimestamp, limit, getDocs, writeBatch, deleteDoc 
 } from 'firebase/firestore';
 import { 
   getAuth, signInAnonymously, onAuthStateChanged 
@@ -11,7 +11,7 @@ import {
   ShieldCheck, AlertTriangle, Pill, Activity, 
   MapPin, Store, Truck, Download,
   CheckCircle, XCircle, LogOut,
-  Building2, Camera, Box, User, Search, ChevronDown, ChevronUp, ClipboardList, Trash2, HelpCircle, Plus, Clock, PlayCircle, Key, FileText, Bell, X, Github, Mail
+  Building2, Camera, Box, User, ChevronDown, ChevronUp, ClipboardList, Trash2, HelpCircle, Plus, Clock, Github
 } from 'lucide-react';
 
 // --- ASSETS & LOCAL IMPORTS ---
@@ -26,6 +26,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
 // --- Firebase Initialization ---
+// REPLACE THESE WITH YOUR ACTUAL ENV VARIABLES IN VERCEL
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -216,9 +217,9 @@ export default function PharmaKryptApp() {
         )}
         
         {view === 'admin-login' && <ManufacturerLogin onLogin={() => setView('admin-dashboard')} />}
-        {view === 'admin-dashboard' && <AdminDashboard userId={user.uid} />}
+        {view === 'admin-dashboard' && <AdminDashboard />}
         
-        {view === 'govt' && <GovernmentDashboard userId={user.uid} />}
+        {view === 'govt' && <GovernmentDashboard />}
         
         {view === 'distributor-login' && (
            <DistributorLogin onJoin={(name, loc) => {
@@ -227,7 +228,7 @@ export default function PharmaKryptApp() {
               setView('distributor-dash');
            }} />
         )}
-        {view === 'distributor-dash' && <DistributorDashboard userId={user.uid} name={sessionName} location={sessionLocation} />}
+        {view === 'distributor-dash' && <DistributorDashboard name={sessionName} location={sessionLocation} />}
 
         {view === 'pharmacy-login' && (
           <PharmacyLogin 
@@ -238,7 +239,7 @@ export default function PharmaKryptApp() {
             }} 
           />
         )}
-        {view === 'pharmacy-dashboard' && <PharmacyDashboard userId={user.uid} pharmacyName={sessionName} location={sessionLocation} />}
+        {view === 'pharmacy-dashboard' && <PharmacyDashboard pharmacyName={sessionName} location={sessionLocation} />}
       </main>
 
       {view === 'landing' && <Footer />}
@@ -556,7 +557,7 @@ function PharmacyLogin({ onJoin }: { onJoin: (name: string, loc: string) => void
 // DASHBOARDS
 // ----------------------------------------------------------------------
 
-function ManufacturingHub({ userId }: { userId: string }) {
+function ManufacturingHub() {
   const [activeTab, setActiveTab] = useState<'batch' | 'distributors'>('batch');
   const [medName, setMedName] = useState('Amoxicillin 500mg');
   const [batchSize, setBatchSize] = useState(5);
@@ -576,7 +577,7 @@ function ManufacturingHub({ userId }: { userId: string }) {
     setCurrentCartonId(masterCartonId);
 
     try {
-      const batchPromises = Array.from({ length: batchSize }).map(async (_, i) => {
+      const batchPromises = Array.from({ length: batchSize }).map(async () => {
         const uniqueId = generateSecureID("MED");
         const newMed: any = {
           name: medName,
@@ -718,7 +719,7 @@ function ManufacturingHub({ userId }: { userId: string }) {
   );
 }
 
-function AdminDashboard({ userId }: { userId: string }) {
+function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'generate' | 'tracking' | 'alerts'>('generate');
   return (
     <div className="space-y-6">
@@ -727,14 +728,14 @@ function AdminDashboard({ userId }: { userId: string }) {
         <button onClick={() => setActiveTab('tracking')} className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'tracking' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-slate-500'}`}>Live Inventory</button>
         <button onClick={() => setActiveTab('alerts')} className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'alerts' ? 'border-b-2 border-red-600 text-red-600' : 'text-slate-500'}`}>Alerts</button>
       </div>
-      {activeTab === 'generate' && <ManufacturingHub userId={userId} />}
+      {activeTab === 'generate' && <ManufacturingHub />}
       {activeTab === 'tracking' && <LiveTrackingTable />}
-      {activeTab === 'alerts' && <AlertsPanel userId={userId} title="Factory Alerts" showResolve={false} />}
+      {activeTab === 'alerts' && <AlertsPanel title="Factory Alerts" showResolve={false} />}
     </div>
   );
 }
 
-function GovernmentDashboard({ userId }: { userId: string }) {
+function GovernmentDashboard() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'manufacturers' | 'pharmacies' | 'distributors' | 'logs'>('dashboard');
   
   return (
@@ -756,7 +757,7 @@ function GovernmentDashboard({ userId }: { userId: string }) {
       {activeTab === 'logs' && (
         <div className="grid md:grid-cols-2 gap-6">
           <LiveMonitor />
-          <AlertsPanel userId={userId} title="National Security Alerts" showResolve={true} />
+          <AlertsPanel title="National Security Alerts" showResolve={true} />
         </div>
       )}
     </div>
@@ -994,7 +995,7 @@ function LiveMonitor() {
               <div key={med.uniqueId + (lastScan.timestamp || '0')} className="p-4 hover:bg-slate-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-full ${med.status === 'authentic' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                    <div className={`p-2 rounded-full ${['stocked', 'sold', 'in-transit'].includes(med.status) ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
                       {med.status === 'counterfeit' ? <AlertTriangle className="w-5 h-5 text-red-600" /> : <Activity className="w-5 h-5" />}
                     </div>
                     <div>
@@ -1015,7 +1016,7 @@ function LiveMonitor() {
   );
 }
 
-function AlertsPanel({ userId, title, showResolve }: { userId: string, title: string, showResolve: boolean }) {
+function AlertsPanel({ title, showResolve }: { title: string, showResolve?: boolean }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
@@ -1104,7 +1105,7 @@ function GovtOverview() {
   )
 }
 
-function DistributorDashboard({ userId, name, location }: { userId: string, name: string, location: string }) {
+function DistributorDashboard({ name, location }: { userId?: string, name: string, location: string }) {
   const [inputCartonId, setInputCartonId] = useState('');
   const [selectedPharmacyId, setSelectedPharmacyId] = useState('');
   const [pharmacies, setPharmacies] = useState<RegisteredEntity[]>([]);
@@ -1216,7 +1217,7 @@ function DistributorDashboard({ userId, name, location }: { userId: string, name
   );
 }
 
-function PharmacyDashboard({ userId, pharmacyName, location }: { userId: string, pharmacyName: string, location: string }) {
+function PharmacyDashboard({ pharmacyName, location }: { userId?: string, pharmacyName: string, location: string }) {
   const [activeTab, setActiveTab] = useState<'scan' | 'inventory'>('scan');
   const [mode, setMode] = useState<'stock' | 'sell'>('stock');
   const [scanResult, setScanResult] = useState<any>(null);
@@ -1367,17 +1368,14 @@ function PharmacyInventory({ pharmacyName }: { pharmacyName: string }) {
     return () => unsubscribe();
   }, [pharmacyName]);
 
+  const clearMyStock = async () => {
+    if (!window.confirm("Clear inventory?")) return;
+    try { const batch = writeBatch(db); inventory.forEach(med => batch.delete(doc(db, 'artifacts', appId, 'public', 'data', 'medicines', med.id))); await batch.commit(); } catch(err) { console.error(err); }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-       <div className="flex justify-between items-center mb-6">
-         <h3 className="text-xl font-bold text-slate-800 flex items-center"><ClipboardList className="w-6 h-6 mr-2 text-blue-600" /> Current Inventory</h3>
-         <div className="flex gap-2 items-center">
-           <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold">Total: {inventory.length}</div>
-           <button onClick={clearGlobalData} className="text-red-600 hover:text-white border border-red-600 hover:bg-red-600 px-3 py-2 rounded-lg transition-colors flex items-center">
-             <Trash2 className="w-4 h-4 mr-1" /> Clear Demo Data
-           </button>
-         </div>
-       </div>
+       <div className="flex justify-between items-center mb-6"><h3 className="text-xl font-bold text-slate-800 flex items-center"><ClipboardList className="w-6 h-6 mr-2 text-blue-600" /> Current Inventory</h3><div className="flex gap-2 items-center"><div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold">Total: {inventory.length}</div>{inventory.length > 0 && (<button onClick={clearMyStock} className="text-red-600 hover:text-white border border-red-600 hover:bg-red-600 px-3 py-2 rounded-lg transition-colors flex items-center"><Trash2 className="w-4 h-4 mr-1" /> Clear</button>)}</div></div>
        {inventory.length === 0 ? <div className="text-center py-8 text-slate-500">No stock available.</div> : (
          <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead className="text-xs text-slate-700 uppercase bg-slate-100"><tr><th className="px-4 py-3">Medicine</th><th className="px-4 py-3">ID</th><th className="px-4 py-3">Date</th></tr></thead><tbody>{inventory.map(item => (<tr key={item.uniqueId} className="border-b hover:bg-slate-50"><td className="px-4 py-3 font-bold">{item.name}</td><td className="px-4 py-3 font-mono text-slate-600">{item.uniqueId}</td><td className="px-4 py-3 text-slate-500">{item.scanHistory.length > 0 ? new Date(item.scanHistory[item.scanHistory.length-1].timestamp).toLocaleDateString() : '-'}</td></tr>))}</tbody></table></div>
        )}
