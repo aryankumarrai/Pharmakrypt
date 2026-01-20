@@ -259,6 +259,10 @@ function LandingPage(props: {
 
   const faqs = [
     { 
+      q: "How do Manufacturers, Distributors, and Pharmacies get their credentials?", 
+      a: "The **Regulatory Authority (Admin)** acts as the centralized root of trust. They exclusively generate and issue secure credentials for legitimate **Manufacturers** and **Pharmacies**. Once a Manufacturer is onboarded by the Admin, they are then authorized to create credentials for their specific **Distributors**. This hierarchical system ensures that no unverified entity can ever enter the supply chain." 
+    },
+    { 
       q: "How does PharmaKrypt prevent theft during transit or manufacturing?", 
       a: "We utilize a \"Digital Batch Activation\" protocol. All QR codes generated at the factory are created in an \"Inactive\" state. Even if a medicine box is stolen from the factory or a delivery truck, the QR code will return an \"Inactive/Invalid\" error if scanned. The batch is only cryptographically activated when a verified Distributor scans the Master Carton upon receipt, ensuring that only medicines in the official supply chain are valid." 
     },
