@@ -260,7 +260,7 @@ function LandingPage(props: {
   const faqs = [
     { 
       q: "How do Manufacturers, Distributors, and Pharmacies get their credentials?", 
-      a: "The **Regulatory Authority (Admin)** acts as the centralized root of trust. They exclusively generate and issue secure credentials for legitimate **Manufacturers** and **Pharmacies**. Once a Manufacturer is onboarded by the Admin, they are then authorized to create credentials for their specific **Distributors**. This hierarchical system ensures that no unverified entity can ever enter the supply chain." 
+      a: "The \"Regulator (Admin)\" acts as the centralized root of trust. They exclusively generate and issue secure credentials for legitimate \"Manufacturers\" and \"Pharmacies\". Once a Manufacturer is onboarded by the Admin, they are then authorized to create credentials for their specific \"Distributors\". This hierarchical system ensures that no unverified entity can ever enter the supply chain." 
     },
     { 
       q: "How does PharmaKrypt prevent theft during transit or manufacturing?", 
