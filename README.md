@@ -126,4 +126,4 @@ To prevent pre-emptive copying (scanning the code before the real patient buys i
 
 This project is licensed under the MIT License \- see the [LICENSE.md](https://www.google.com/search?q=LICENSE) file for details.
 
-[![PharmaKrypt](/src/assets/logo.png)](https://www.pharmakrypt.app)
+[![PharmaKrypt](/src/assets/logo.png)](https://www.pharmakrypt.app).
